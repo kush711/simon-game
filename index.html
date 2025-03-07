@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot.com</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <nav>
+        <h3>Bot.TicTacToe</h3>
+        <div id="player2-btn"> 
+            <button class="player2 player-btn-checked" id="player2-bot">Bot</button>
+            <button class="player2" id="player2-friend">Player</button>
+        </div>
+        
+
+    </nav>
+
+    <div id="game-content">
+        <div id="game-field">
+            <div class="game-box box-coord-11"></div>
+            <div class="game-box box-coord-12"></div>
+            <div class="game-box box-coord-13"></div>
+            <div class="game-box box-coord-21"></div>
+            <div class="game-box box-coord-22"></div>
+            <div class="game-box box-coord-23"></div>
+            <div class="game-box box-coord-31"></div>
+            <div class="game-box box-coord-32"></div>
+            <div class="game-box box-coord-33"></div>
+        </div>
+
+        <div id="game-info">
+            <p id="info-player">Turn of Player 1</p>
+            <p id="info-symbol">Turn for O </p>
+            <button id="reset-btn">reset</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.3.2/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
