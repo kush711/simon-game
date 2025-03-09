@@ -1,209 +1,112 @@
+var userClickedPattern=[];
+
+var level=0;
+
+let gamePattern=[];
+var buttonColors=["red","blue","green","yellow"];
 
 
-const botBtn=document.getElementById("player2-bot");
-const friendBtn=document.getElementById("player2-friend");
-const player2BtnField=document.getElementById("player2-btn");
 
-let checkMatrix=[[0,0,0],[0,0,0],[0,0,0]];
-const turnSymbol=['O','X'];
 
-const infoPlayer=document.getElementById("info-player");
-const infoSymbol=document.getElementById("info-symbol");
 
-const gameBox=document.querySelectorAll(".game-box");
-const gameField=document.getElementById("game-field");
-
-const player2=[botBtn,friendBtn];
-let symbol='O';
-
-const resetBtn=document.getElementById("reset-btn");
-
-player2BtnField.addEventListener("click",(event)=>{
-    if(!event.target.classList.contains("player-btn-checked")){
-        friendBtn.classList.toggle("player-btn-checked");
-        botBtn.classList.toggle("player-btn-checked");
-    }
-});
-
-function moveUpdate(coordX,coordY){
-    let matrixValue=(symbol==turnSymbol[0])?-1:1;
-
-    if(checkMatrix[coordY][coordX]!=0){
-        return;
-    }
-    checkMatrix[coordY][coordX]=matrixValue;
-
-    gameBox.forEach((ele)=>{
-        if(ele.classList.contains(`box-coord-${coordY+1}${coordX+1}`)){
-            ele.classList.add(`box-${symbol}`);
-            ele.innerText=`${symbol}`;
-
-        }
-    });
-            symbol=turnSymbol[(symbol==turnSymbol[0])?1:0];
-
-            infoPlayer.innerText=`Turn of Player ${turnSymbol.indexOf(symbol)+1}`;
-            infoSymbol.innerText=`Turn of ${symbol}`;
-       
-
-    if(checkWinner(coordX,coordY)){
-        winner(coordX,coordY);
-    }
+function playSound(name){
+    var audio=new Audio("./sounds/"+name+".mp3");
+    audio.play();
 }
 
-function checkWinner(coordX,coordY){
-    let checkValue=checkMatrix[coordY][coordX];
-    
-    for (let i=0;i<3;i++){
-        if(checkValue!=checkMatrix[coordY][i])
-            break;
-        if(i==2)
-            return true;
-        
-        }
 
-    for (let i=0;i<3;i++){
-        if(checkValue!=checkMatrix[i][coordX])
-            break;
-        if(i==2)
-            return true;
+function animatePress(currentColor){
+
+    $("#"+currentColor).addClass("pressed");
+
+    playSound(currentColor);
+
+    setTimeout(function(){
+    $("#"+currentColor).removeClass("pressed");
+    },100);
+}
+
+function nextSequence(){
+    var randomNumber=Math.floor(Math.random()*4);
+
+    var randomChosenColor=buttonColors[randomNumber];
+    gamePattern.push(randomChosenColor);
+
+    $("#"+randomChosenColor).fadeOut(50).fadeIn(50);
+    playSound(randomChosenColor);
+
+    
+
+    return;
+}
+
+
+function restart(){
+    $("body").addClass("game-over");
+    setTimeout(function(){
+        $("body").removeClass("game-over");
+    },1000);
+    level=0;
+    gamePattern.length=0;
+    userClickedPattern.length=0;
+    var audio=new Audio("./sounds/wrong.mp3");
+    audio.play();
+
+    index=0;
+    $("h1").text("GAME OVER! press any key to restart");
+    gameStarted=false;
+    return;
+}
+
+function checkAnswer(currentLevel){
+    for(let i=0;i<=currentLevel;i++){
+
+        if(userClickedPattern[i]!==gamePattern[i]){
+            restart();
+            return ;
+
+
+        }
+    }
             
-        }   
-        
-    if(coordX==coordY){
-        for(let i=0;i<3;i++){
-            if(checkValue!=checkMatrix[i][i])
-                break;
-            if(i==2)
-                return true;
-        }
-    }
-
-    if(coordX+coordY==2){
-        for(let i=0;i<3;i++){
-            if(checkValue!=checkMatrix[i][2-i])
-                break;
-            if(i==2)
-                return true;
-        }
-    }
-    
-    return false;
-
+            
+            return;
 }
 
-function celebrate() {
-    confetti({
-        particleCount: 200,
-        spread: 70,
-        origin: { y: 0.6 }
+var gameStarted=false;
+
+
+$(document).keydown(function(){
+
+    if(!gameStarted){
+
+        $("h1").text("level "+ ++level);
+    nextSequence();
+    gameStarted=true;
+
+}});
+
+
+
+    
+let index=0;
+    $(".btn").click(function(){
+
+    let chosenID=$(this).attr("id");
+
+    animatePress(chosenID);
+
+    userClickedPattern.push(chosenID);
+    
+   
+    checkAnswer(index++);
+        if((index==level)&&(index!=0)){
+
+            $("h1").text("level "+ ++level );
+            setTimeout(nextSequence(),8000);
+            userClickedPattern.length=0;
+            index=0;
+        }
+
+
     });
-}
-
-function winner(coordX,coordY){
-    let winner=(checkMatrix[coordY][coordX]==1)?'X':'O';     
-    infoPlayer.innerText="Winner is...";
-    infoSymbol.innerText=`Player ${turnSymbol.indexOf(winner)+1}`;
-    
-
-
-    if(winner=='O'|| (winner!='O' && friendBtn.classList.contains("player-btn-checked")))
-        celebrate();
-
-    gameField.addEventListener("click",()=>{
-        reset();
-    })
-}
-
-gameField.addEventListener("click",(event)=>{
-    let coordX=-1;
-    let coordY=-1;
-
-    for(let i=1;i<=3;i++){
-        for(let j=1;j<=3;j++){
-            if(event.target.classList.contains(`box-coord-${i}${j}`)){
-                coordX=j-1;
-                coordY=i-1;
-            }
-        }
-    }
-
-    moveUpdate(coordX,coordY);
-
-    if(symbol=='X'  && botBtn.classList.contains("player-btn-checked")){
-        setTimeout(botTurn,1000);
-    }
-});
-
-resetBtn.addEventListener("click",()=>{
-    reset();
-});
-
-
-function reset(){
-    location.reload();
-}
-
-function botTurn(){
-    for(let i=0;i<3;i++){
-        for(let j=0;j<3;j++){
-
-        if( checkMatrix[i][(j+1)%3]==checkMatrix[i][(j+2)%3] && checkMatrix[i][(j+1)%3]!=0 && checkMatrix[i][j]==0){
-            moveUpdate(j,i);
-            return;
-        }
-    }
-    }
-
-    for(let i=0;i<3;i++){
-        for(let j=0;j<3;j++){
-
-        if( checkMatrix[(j+1)%3][i]==checkMatrix[(j+2)%3][i] && checkMatrix[(j+1)%3][i]!=0 && checkMatrix[j][i]==0){
-            moveUpdate(i,j);
-            return;
-        }
-    }
-    }
-
-    for(let j=0;j<3;j++){
-        if(checkMatrix[(j+1)%3][(j+1)%3]==checkMatrix[(j+2)%3][(j+2)%3] && checkMatrix[(j+1)%3][(j+1)%3]!=0 && checkMatrix[j][j]==0){
-            moveUpdate(j,j);
-            return;
-        }
-    }
-
-    for(let i=0;i<3;i++){
-        if(checkMatrix[(i+1)%3][(4-i)%3]==checkMatrix[(i+2)%3][(3-i)%3] && checkMatrix[(i+1)%3][(4-i)%3]!=0 && checkMatrix[i][2-i]==0){
-            moveUpdate(2-i,i);
-            return;
-        }
-    }
-
-let i=0;
-while(i<36){
-    let Xcoord=Math.floor(Math.random() *3);
-    let Ycoord=Math.floor(Math.random() *3);
-
-    if((Xcoord+Ycoord)%2==0 && checkMatrix[Ycoord][Xcoord]==0){
-        moveUpdate(Xcoord,Ycoord);
-        return;
-    }
-    i++;
-}
-    
-
-    let emptyCells = [];
-    for (let y = 0; y < 3; y++) {
-        for (let x = 0; x < 3; x++) {
-            if (checkMatrix[y][x] == 0) {
-                emptyCells.push({ x, y });
-            }
-        }
-    }
-
-    if (emptyCells.length > 0) {
-        let randomMove = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-        moveUpdate(randomMove.x, randomMove.y);
-
-    }
-}
